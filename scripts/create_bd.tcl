@@ -1,5 +1,6 @@
 proc create_bd {board_path} {
     set bd_name "design_1"
+    create_bd_design ${bd_name}
     save_bd_design
 
 
