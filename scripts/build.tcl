@@ -17,7 +17,7 @@ set script_path     [file dirname [file normalize [info script]]]
 
 #Get configuration from script parameters
 set board_name      [read_param 0 "zynq_mini_7020"]
-set build_type      [read_param 1 "create_bd"]
+set build_type      [read_param 1 "create_empty_bd"]
 set prj_folder_name [read_param 2 "vivado_bd"]
 set prj_name        ${board_name}
 
@@ -30,7 +30,8 @@ set ip_repo_path    [file normalize ${script_path}/../ip_repo]
 source ${board_path}/platform.tcl
 #Aux. processes
 source ${script_path}/aux_proc.tcl
-source ${script_path}/create_bd.tcl
+source ${script_path}/create_empty_bd.tcl
+source ${script_path}/create_microblaze_bd.tcl
 
 #Read part
 set part_name       [platfrom_get_part]
@@ -51,8 +52,10 @@ if {[file exist ${ip_repo_path}]} {
 }
 
 #Create block design or use pure HDL (FPGA only)
-if {${build_type} == "create_bd"} {
-    create_bd ${board_path}
+if {${build_type} == "create_empty_bd"} {
+    create_empty_bd ${board_path}
+} elseif {${build_type} == "create_microblaze_bd"} {
+    create_microblaze_bd ${board_path}
 } else {
     #HDL design
     add_files -norecurse ${board_path}/arty_a7_rtl.sv

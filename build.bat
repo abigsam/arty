@@ -8,22 +8,24 @@ ECHO # Author: abigsam@gmail.com
 ECHO # Vivado version: 2023.1
 ECHO #########################################################
 set vivado_path=C:\Xilinx\Vivado\2023.1
-set build_type="create_bd"
+set build_type="create_empty_bd"
 set board_name="arty_a7_35t"
 set project_folder_name=%board_name:"=%_bd
 ECHO.
 ECHO Avaliable options:
-ECHO [1] Build Block design project
-ECHO [2] Build RTL project
-ECHO [3] Cleanup Git repository
-ECHO [4] Exit
+ECHO [1] Build Empty block design project
+ECHO [2] Build Microblaze block design project
+ECHO [3] Build RTL project
+ECHO [4] Cleanup Git repository
+ECHO [5] Exit
 ECHO.
 
-CHOICE /C 1234 /N /M "Enter your choice:"
-IF ERRORLEVEL 4 GOTO END
-IF ERRORLEVEL 3 GOTO RUN_CLEANUP_PRJ
-IF ERRORLEVEL 2 GOTO RUN_BUILD_RTL
-IF ERRORLEVEL 1 GOTO RUN_BUILD_BD
+CHOICE /C 12345 /N /M "Enter your choice:"
+IF ERRORLEVEL 5 GOTO END
+IF ERRORLEVEL 4 GOTO RUN_CLEANUP_PRJ
+IF ERRORLEVEL 3 GOTO RUN_BUILD_RTL
+IF ERRORLEVEL 2 GOTO RUN_BUILD_MICROBLAZE_BD
+IF ERRORLEVEL 1 GOTO RUN_BUILD_EMPTY_BD
 
 :RUN_CLEANUP_PRJ
 ECHO Cleanup project folder...
@@ -41,7 +43,19 @@ goto END
 :RUN_BUILD_RTL
 set build_type="create_rtl"
 set project_folder_name=%board_name:"=%_rtl
-:RUN_BUILD_BD
+goto BUILD
+
+:RUN_BUILD_EMPTY_BD
+set build_type="create_empty_bd"
+set project_folder_name=%board_name:"=%_bd
+goto BUILD
+
+:RUN_BUILD_MICROBLAZE_BD
+set build_type="create_microblaze_bd"
+set project_folder_name=%board_name:"=%_bd_microblaze
+goto BUILD
+
+:BUILD
 rem Run Vivado batch file with Tcl build script
 rem Tcl script has two arguments:
 rem - run Vivado GUI
@@ -74,6 +88,15 @@ rem pause
     del "%~dp0\*.log"
     
     call %vivado_bat_path% -mode batch -nojournal -notrace -source %~1 -tclargs %~2 %~3 %~4 %~5
+
+    if %errorlevel% equ 0 (
+        echo Vivado executed script without errors
+    ) else (
+        echo Vivado return error: %ERRORLEVEL%
+        pause
+        exit
+    )
+
 EXIT /B 0
 
 
